@@ -66,29 +66,21 @@
 ; Check that the 12-times table is computed correctly
 (for* ((i (range 1 12))
        (j (range 1 12)))
-  (printf "~s x ~s = ~s~n" i j (mul i j))
+ ; (printf "~s x ~s = ~s~n" i j (mul i j))
   (check-equal? (mul i j) (* i j) (format "~s x ~s = ~s" i j (* i j)))
   )
 
-(for ((i (in-range 1 999)))
-  (printf "~s ~s\n" i (exact->inexact (/ 1 i))))
-
-(define p 4567)
+(define p 6467)
 (define q 3210)
 
-(printf "~s~n" (exact->inexact (/ p q)))
+
 
 (define qs (number->string q))
 (define f (string->number (substring qs 0 3)))
 
-(display f)(newline)
+(printf "F ~s~n" f)
 (define fd (num2digits f))
 (display fd)(newline)
-
-(define A (exact->inexact (/ 1 f)))
-(printf "A ~s~n" A)
-(printf "Aq ~s~n" (* A q))(newline)
-(printf "Aq ~s~n" (* 0.00312 q))(newline)
 
 (define (expand x)
   (+ 1
@@ -100,4 +92,13 @@
 
 (define a-map (make-hash))
 (for ((f (in-range 100 999)))
-  (hash-set! a-map f (exact->inexact (/ 1 f))))
+  (hash-set! a-map f (ceiling (* 100000 (exact->inexact (/ 1 f))))))
+
+(define A (hash-ref a-map f))
+(printf "~s : ~s~n" f A)
+(define x (* A f))
+(define ex (expand x))
+(printf "X: ~s ~s~n" x ex)
+
+(printf "~s~n" (* A p ex))
+(printf "~s~n" (exact->inexact (/ p q)))
