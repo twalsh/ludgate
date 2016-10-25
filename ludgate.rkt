@@ -75,35 +75,42 @@
   (check-equal? (mul i j) (* i j) (format "~s x ~s = ~s" i j (* i j)))
   )
 
-(define p 6467)
-(define q 3210)
-
-
+(define p 6789)
+(define q 3456)
 
 (define qs (number->string q))
+; Get first 3 digits of q
 (define f (string->number (substring qs 0 3)))
 
-(printf "F ~s~n" f)
-(define fd (num2digits f))
-(display fd)(newline)
+(printf "q -> f ~a ~a~n" q f)
 
+; Expand the series (1 + x)^-1
 (define (expand x)
   (+ 1
-     (- x)
-     (+ (for/sum ((i (in-range 2 10)))
-          (expt x i)))))
+     (for/sum ((i (in-range 1 10)))
+       (if (even? i)
+           (expt x i)
+           (- (expt x i))))))
 
-(expand 2)
+(define reciprocals (make-hash))
+(for ((r (in-range 100 999)))
+  (hash-set! reciprocals r (round (* 100000 (exact->inexact (/ 1 r))))))
 
-(define a-map (make-hash))
-(for ((f (in-range 100 999)))
-  (hash-set! a-map f (ceiling (* 100000 (exact->inexact (/ 1 f))))))
+; A = 1/f
+(define A (hash-ref reciprocals f))
+(printf "f ~s : reciprocal A ~s~n" f A)
 
-(define A (hash-ref a-map f))
-(printf "~s : ~s~n" f A)
-(define x (* A f))
+(define sft 10)
+
+(define Aq (/ (* A q) (* 100000 sft)))
+(define Aq2 (/ (exact->inexact (* (/ 1 f) q)) sft))
+
+(printf "Aq ~a ~a~n" Aq Aq2)
+(define x (- Aq 1))
+(display x)
+  (newline)
 (define ex (expand x))
-(printf "X: ~s ~s~n" x ex)
 
-(printf "~s~n" (* A p ex))
-(printf "~s~n" (exact->inexact (/ p q)))
+(define result (/ (* A p ex) (* 100000 sft)))
+(define p/q (exact->inexact (/ p q)))
+(printf "~a ~a~n" p/q result)
