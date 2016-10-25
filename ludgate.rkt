@@ -40,33 +40,38 @@
 ; tail to the head of list. The return value is the sum
 ; of the shifted list.
 (define (shift products)
-  (apply + (for/list ((i (in-range (length products)))
-                      (p (reverse products)))
-             (* p (expt 10 i)))))
+  (for/list ((i (in-range (length products)))
+             (p (reverse products)))
+    (* p (expt 10 i))))
 
+(define (shift-sum products)
+  (apply + (shift products)))
 
 ; Compute partial product of multiplying the multiplicand
-; (represented as a list of its digits) by a digit of th
+; (represented as a list of its digits) by a digit of the
 ; multiplier.
 (define (partial-product d1 digits)
-  (shift
-   (for/list ((d2 digits))
-     (let ((i1 (vector-ref simple-index d1))
-           (i2 (vector-ref simple-index d2)))
-       (let ((ci (+ i1 i2)))
-         (hash-ref product-table ci))
-       ))))
+  (define products
+    (for/list ((d2 digits))
+      (let ((i1 (vector-ref simple-index d1)) ; Index of multiplier digit
+            (i2 (vector-ref simple-index d2))) ; Index of multiplicand digit
+        (let ((ci (+ i1 i2)))
+          (hash-ref product-table ci)) ; Get partial prodct from table
+        )))
+  (apply + ; Sum the list of shifted products
+         (shift products)))
 
 ; Multiply two integers by the method of partial products
 (define (mul n1 n2)
   (let ((digits1 (num2digits n1))
         (digits2 (num2digits n2)))
-    (shift (map (lambda (d) (partial-product d digits2)) digits1))))
+    (define partial-products (map (lambda (d) (partial-product d digits2)) digits1))
+    (apply + (shift partial-products))))
 
 ; Check that the 12-times table is computed correctly
 (for* ((i (range 1 12))
        (j (range 1 12)))
- ; (printf "~s x ~s = ~s~n" i j (mul i j))
+  ; (printf "~s x ~s = ~s~n" i j (mul i j))
   (check-equal? (mul i j) (* i j) (format "~s x ~s = ~s" i j (* i j)))
   )
 
